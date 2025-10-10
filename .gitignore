@@ -1,0 +1,81 @@
+# Compiled object files
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.libs
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Static Libraries
+*.a
+*.lib
+
+# Shared libraries
+*.so
+*.dll
+*.dylib
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.ilk
+*.ipdb
+*.sbr
+
+# Output of make
+*.out
+*.app
+*.i
+
+# Dependency directories
+/deps/
+/build/
+/bin/
+/Debug/
+/Release/
+/x64/
+/x86/
+
+# IDE/project files
+# Visual Studio
+*.vcxproj*
+*.vcproj*
+*.sln
+*.suo
+*.user
+*.ncb
+*.opensdf
+*.sdf
+*.cache
+*.VC.db
+
+# Code::Blocks
+*.cbp
+*.layout
+*.depend
+
+# Qt Creator
+*.pro.user
+*.qmake.stash
+*.moc
+*.qrc
+
+# CLion
+cmake-build-*/
+.idea/
+
+# Other
+*.log
+*.tmp
+*.swp
+*.DS_Store
