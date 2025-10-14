@@ -12,6 +12,7 @@ Scanner::Scanner(const std::string& source)
     keywords["double"] = T_DOUBLE;
     keywords["char"] = T_CHAR;
     keywords["while"] = T_WHILE;
+    keywords["main"] = T_MAIN;
 }
 
 // "Заглядывание" вперед
@@ -64,7 +65,17 @@ Token Scanner::getNextToken() {
     // 1. Ветка для идентификаторов и ключевых слов (состояние R на диаграмме)
     if (isalpha(c) || c == '_') {
         while (isalnum(peek()) || peek() == '_') {
-            advance();
+            if (current_pos - start_pos < MAX_LEX_LENGTH) {
+                advance();
+            } else {
+                // Если длина превышена, просто двигаемся дальше, не сохраняя символы
+                while (isalnum(peek()) || peek() == '_') {
+                    advance();
+                }
+                // Возвращаем ошибку о слишком длинном идентификаторе
+                std::string text = source_code.substr(start_pos, current_pos - start_pos);
+                return {T_ERROR, text, start_line};
+            }
         }
         std::string text = source_code.substr(start_pos, current_pos - start_pos);
         auto it = keywords.find(text);
@@ -77,27 +88,82 @@ Token Scanner::getNextToken() {
     // 2. Ветка для числовых констант
     if (isdigit(c) || c == '.') {
         bool isFloat = (c == '.');
+
+        if (isFloat && !isdigit(peek())) {
+            return {T_ERROR, ".", start_line}; // Это одиночная точка, сразу возвращаем ошибку
+        }
+
+        size_t digit_count = 0;
         // Обработка 16-ричных констант (0x...)
         if (c == '0' && (peek() == 'x' || peek() == 'X')) {
             advance(); // съедаем 'x'
-            start_pos += 2; // смещаем начало лексемы
+
+            if (!isxdigit(peek())) {
+                std::string text = source_code.substr(start_pos, current_pos - start_pos);
+                return {T_ERROR, text, start_line}; // Ошибка: "0x" без цифр
+            }
+
+            size_t hex_start_pos = current_pos;
             while (isxdigit(peek())) {
                 advance();
             }
-            return {T_HEX_CONST, source_code.substr(start_pos, current_pos - start_pos), start_line};
-        }
-        // Обработка 10-ричных и вещественных
-        while (isdigit(peek())) {
-            advance();
-        }
-        if (peek() == '.') {
-            isFloat = true;
-            advance();
-            while (isdigit(peek())) {
+            digit_count = current_pos - hex_start_pos;
+            
+            // Проверка длины для 16-ричного числа (max 8 цифр для long)
+            if (digit_count > 8) {
+                return {T_ERROR, source_code.substr(start_pos, current_pos - start_pos), start_line};
+            }
+        } else { // Обработка 10-ричных и вещественных констант
+            size_t integer_part_count = 0;
+            size_t fractional_part_count = 0;
+
+            if (c != '.') {
+                // Считаем цифры в целой части
+                integer_part_count = 1; // Уже считали первую цифру
+                while (isdigit(peek())) {
+                    advance();
+                    integer_part_count++;
+                }
+            }
+
+            if (isFloat || peek() == '.') {
+                isFloat = true;
                 advance();
+                while (isdigit(peek())) {
+                    advance();
+                    fractional_part_count++;
+                }
+            }
+            
+            if (isFloat) {
+                // Для float/double не больше 15 знаков в каждой части
+                if (integer_part_count > 15 || fractional_part_count > 15) {
+                    return {T_ERROR, source_code.substr(start_pos, current_pos - start_pos), start_line};
+                }
+            } else {
+                // Для int/long не больше 10 знаков (макс значение 2,147,483,647)
+                if (integer_part_count > 10) {
+                     return {T_ERROR, source_code.substr(start_pos, current_pos - start_pos), start_line};
+                }
             }
         }
+        
+        // Проверка на недопустимый символ после числа
+        char next_char = peek();
+        // Список символов, которые МОГУТ идти после числа
+        std::string valid_followers = " \t\n\r()[]{};,+-*/%<>=&|^";
+
+        if (next_char != '\0' && valid_followers.find(next_char) == std::string::npos) {
+            // Если следующий символ - не конец строки И он НЕ найден в списке допустимых,
+            // то это ошибка.
+            std::string error_text = source_code.substr(start_pos, current_pos - start_pos + 1);
+            return {T_ERROR, error_text, start_line};
+        }
+
         std::string text = source_code.substr(start_pos, current_pos - start_pos);
+        if (text.find("0x") != std::string::npos || text.find("0X") != std::string::npos) {
+            return {T_HEX_CONST, text, start_line};
+        }
         if (isFloat) {
             return {T_FLOAT_CONST, text, start_line};
         }

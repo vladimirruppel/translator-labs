@@ -5,9 +5,11 @@
 #include <vector>
 #include <map>
 
+const size_t MAX_LEX_LENGTH = 100;
+
 enum TokenType {
     // Ключевые слова
-    T_VOID, T_SHORT, T_LONG, T_INT, T_DOUBLE, T_CHAR, T_WHILE,
+    T_VOID, T_SHORT, T_LONG, T_INT, T_DOUBLE, T_CHAR, T_WHILE, T_MAIN,
 
     // Идентификаторы
     T_IDENT,

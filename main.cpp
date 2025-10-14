@@ -13,6 +13,7 @@ std::string tokenTypeToString(TokenType type) {
         case T_DOUBLE: return "T_DOUBLE";
         case T_CHAR: return "T_CHAR";
         case T_WHILE: return "T_WHILE";
+        case T_MAIN: return "T_MAIN";
         case T_IDENT: return "T_IDENT";
         case T_DEC_CONST: return "T_DEC_CONST";
         case T_HEX_CONST: return "T_HEX_CONST";

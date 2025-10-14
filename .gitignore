@@ -79,3 +79,6 @@ cmake-build-*/
 *.tmp
 *.swp
 *.DS_Store
+
+
+*.txt
