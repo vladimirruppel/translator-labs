@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "scanner.h"
+#include "parser.h"
 
 // Функция для удобного вывода имени токена
 std::string tokenTypeToString(TokenType type) {
@@ -64,22 +65,16 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
-    Scanner scanner(source);
-    Token token;
+    try {
+        Scanner scanner(source);
+        Parser parser(&scanner);
+        parser.parse();
+        
+        std::cout << "Syntax analysis finished successfully." << std::endl;
 
-    std::cout << "Scanning file: " << argv[1] << "\n\n";
-    
-    do {
-        token = scanner.getNextToken();
-        std::cout << "Line " << token.line 
-                  << ":\t Type: " << tokenTypeToString(token.type) 
-                  << ",\t Text: \"" << token.text << "\"" << std::endl;
-    } while (token.type != T_EOF && token.type != T_ERROR);
-    
-    if (token.type == T_ERROR) {
-        std::cerr << "\nScanning failed due to an error." << std::endl;
-    } else {
-        std::cout << "\nScanning finished successfully." << std::endl;
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Syntax error: " << e.what() << std::endl;
+        return 1;
     }
 
     return 0;

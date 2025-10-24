@@ -68,6 +68,11 @@ public:
     // Главный метод, который возвращает следующую лексему из потока
     Token getNextToken();
 
+    size_t getUK();
+    void putUK(size_t pos);
+    int getLine(); 
+    void setLine(int line);
+
 private:
     std::string source_code; // Строка с исходным кодом
     size_t current_pos;      // Текущая позиция в строке (аналог 'uk' в пособии)

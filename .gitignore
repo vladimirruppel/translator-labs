@@ -80,5 +80,8 @@ cmake-build-*/
 *.swp
 *.DS_Store
 
-
+# Ignore text files
 *.txt
+
+.vscode/
+test.sh

@@ -223,3 +223,19 @@ Token Scanner::getNextToken() {
     // 5. Если ничего не подошло - это ошибка
     return {T_ERROR, std::string(1, c), start_line};
 }
+
+size_t Scanner::getUK() {
+    return current_pos;
+}
+
+void Scanner::putUK(size_t pos) {
+    current_pos = pos;
+}
+
+int Scanner::getLine() { 
+    return current_line;
+}
+
+void Scanner::setLine(int line) { 
+    current_line = line; 
+}
