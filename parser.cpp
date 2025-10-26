@@ -149,7 +149,7 @@ void Parser::Ps() {
     consume(T_IDENT, "Ожидался идентификатор параметра.");
 }
 
-// O -> P; | Q | U | H; | ;
+// O -> P; | Q | U | H; | D | ;
 void Parser::O() {
     switch (current_token.type) {
         case T_IDENT:
@@ -177,6 +177,14 @@ void Parser::O() {
             break;
         }
 
+        case T_SHORT:
+        case T_LONG:
+        case T_INT:
+        case T_DOUBLE:
+        case T_CHAR:
+            D();
+            break;
+
         case T_LBRACE:
             Q();
             break;
@@ -190,7 +198,7 @@ void Parser::O() {
             break;
 
         default:
-            error("Ожидался оператор.");
+            error("Ожидался оператор или описание данных.");
             break;
     }
 }
@@ -206,16 +214,12 @@ void Parser::Q() {
 void Parser::K() {
     while (current_token.type == T_IDENT || current_token.type == T_MAIN ||
            current_token.type == T_LBRACE || current_token.type == T_WHILE ||
-           current_token.type == T_SEMICOLON)
+           current_token.type == T_SEMICOLON || 
+           current_token.type == T_INT || current_token.type == T_SHORT || // описания данных внутри функций
+           current_token.type == T_LONG || current_token.type == T_DOUBLE ||
+           current_token.type == T_CHAR)
     {
         O();
-    }
-
-    if (current_token.type == T_INT || current_token.type == T_SHORT ||
-        current_token.type == T_LONG || current_token.type == T_DOUBLE ||
-        current_token.type == T_CHAR)
-    {
-        error("Описание переменных внутри функций не поддерживается в этом языке.");
     }
 }
 
