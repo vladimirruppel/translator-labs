@@ -3,7 +3,7 @@ CXXFLAGS = -g -Wall -std=c++17
 
 TARGET = translator.exe
 
-SOURCES = main.cpp scanner.cpp parser.cpp
+SOURCES = main.cpp scanner.cpp parser.cpp semantic.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

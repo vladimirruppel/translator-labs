@@ -2,8 +2,10 @@
 #define PARSER_H
 
 #include "scanner.h"
+#include "semantic.h"
 #include <iostream>
 #include <string>
+#include <vector> 
 
 class Parser {
 public:
@@ -15,6 +17,7 @@ public:
 private:
     Scanner* scanner;
     Token current_token;
+    SemanticAnalyzer sem_analyzer;
 
     // Вспомогательные методы
     void advance(); // Получить следующий токен от сканера
@@ -30,13 +33,13 @@ private:
     // Описания
     void D(); // <описание_данных>
     void F(); // <описание_функции>
-    void Tp(); // <тип>
-    void Z(); // <список_переменных>
+    DataType Tp(); // <тип>
+    void Z(DataType type); // <список_переменных>
 
     // Параметры функции
-    void G(); // <параметры>
-    void Zf(); // <список_параметров>
-    void Ps(); // <один_параметр>
+    std::vector<Param*> G(); // <параметры>
+    void Zf(std::vector<Param*>& params); // <список_параметров>
+    Param* Ps(); // <один_параметр>
 
     // Операторы
     void O(); // <оператор>
@@ -47,21 +50,21 @@ private:
     void H(); // <вызов_функции>
 
     // Параметры вызова функции
-    void L(); // <входные_параметры>
-    void M(); // <список_входных_параметров>
+    void L(Symbol* func_sym); // <входные_параметры>
+    void M(Symbol* func_sym); // <список_входных_параметров>
     
     // Выражения (по уровням приоритета)
-    void V();  // <выражение>
-    void Vx(); // <выражение_xor>
-    void Va(); // <выражение_и>
-    void Ve(); // <выражение_равенства>
-    void Vr(); // <выражение_отношения>
-    void Vs(); // <выражение_сдвига>
-    void A();  // <слагаемое>
-    void B();  // <множитель>
-    void Vu(); // <унарное_выражение>
-    void E();  // <эл.выр.>
-    void C();  // <константа>
+    DataType V();  // <выражение>
+    DataType Vx(); // <выражение_xor>
+    DataType Va(); // <выражение_и>
+    DataType Ve(); // <выражение_равенства>
+    DataType Vr(); // <выражение_отношения>
+    DataType Vs(); // <выражение_сдвига>
+    DataType A();  // <слагаемое>
+    DataType B();  // <множитель>
+    DataType Vu(); // <унарное_выражение>
+    DataType E();  // <эл.выр.>
+    DataType C();  // <константа>
 };
 
 #endif // PARSER_H
