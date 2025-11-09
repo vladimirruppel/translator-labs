@@ -149,27 +149,26 @@ void SemanticAnalyzer::semCheckAssignment(Symbol* left, DataType right_type, int
 
     DataType left_type = left->type;
 
-    // Правила приведения типов при присваивании
-    // double = int/short/long/char (OK)
-    // int/long/short = char (OK)
-    // Все остальное, где типы не совпадают - ошибка (упрощенно)
-    
-    bool is_compatible = (left_type == right_type);
-    
-    if (!is_compatible) {
-        bool is_numeric_left = (left_type == TYPE_INT || left_type == TYPE_SHORT || left_type == TYPE_LONG || left_type == TYPE_DOUBLE);
-        bool is_numeric_right = (right_type == TYPE_INT || right_type == TYPE_SHORT || right_type == TYPE_LONG || right_type == TYPE_DOUBLE || right_type == TYPE_CHAR);
-        
-        if (is_numeric_left && is_numeric_right) {
-            // Разрешаем любое присваивание между числовыми типами и char
-            // В реальном компиляторе здесь были бы предупреждения о потере данных (double -> int)
-            is_compatible = true;
-        }
+    if (left_type == right_type) {
+        return;
     }
-    
-    if (!is_compatible) {
-         throw std::runtime_error("Ошибка на строке " + std::to_string(line) + ": Несовместимые типы при присваивании. Нельзя присвоить '" + dataTypeToString(right_type) + "' переменной типа '" + dataTypeToString(left_type) + "'");
+
+    bool is_right_int_family = (right_type == TYPE_INT || right_type == TYPE_SHORT || right_type == TYPE_LONG || right_type == TYPE_CHAR);
+    if (left_type == TYPE_DOUBLE && is_right_int_family) {
+        return;
     }
+
+    bool is_left_int_family = (left_type == TYPE_INT || left_type == TYPE_SHORT || left_type == TYPE_LONG || left_type == TYPE_CHAR);
+    if (is_left_int_family && right_type == TYPE_DOUBLE) {
+        std::cout << "[Warning]: На строке " << line
+                  << ": возможно сужающее преобразование (потеря данных) при присваивании '"
+                  << dataTypeToString(right_type) << "' переменной типа '"
+                  << dataTypeToString(left_type) << "'." << std::endl;
+        return;
+    }
+
+    // Ошибка при несовместимости типов
+    throw std::runtime_error("Ошибка на строке " + std::to_string(line) + ": Несовместимые типы при присваивании. Нельзя присвоить '" + dataTypeToString(right_type) + "' переменной типа '" + dataTypeToString(left_type) + "'");
 }
 
 // Проверка типов в бинарной операции
