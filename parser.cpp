@@ -101,6 +101,8 @@ void Parser::Z(DataType type) {
         }
         
         Symbol* new_var = new Symbol{id_token.text, CAT_VARIABLE, type};
+        new_var->var_info.is_initialized = false;
+
         if (!sem_analyzer.addSymbol(new_var)) {
             error("Повторное объявление переменной '" + id_token.text + "'");
         }
@@ -112,6 +114,7 @@ void Parser::Z(DataType type) {
             DataType expr_type = V();
 
             sem_analyzer.semCheckAssignment(new_var, expr_type, id_token.line);
+            new_var->var_info.is_initialized = true;
         }
     } while (current_token.type == T_COMMA ? (advance(), true) : false);
 }
@@ -149,6 +152,7 @@ void Parser::F() {
     // Объявляем параметры в новой области
     for(Param* p : params) {
         Symbol* param_sym = new Symbol{p->name, CAT_PARAMETER, p->type};
+        param_sym->var_info.is_initialized = true;
         if (!sem_analyzer.addSymbol(param_sym)) {
             error("Повторное объявление параметра '" + p->name + "'");
         }
@@ -293,6 +297,7 @@ void Parser::P() {
     DataType right_type = V();
     
     sem_analyzer.semCheckAssignment(var_sym, right_type, id_token.line);
+    var_sym->var_info.is_initialized = true; 
 }
 
 // U -> while (V) O
@@ -498,6 +503,15 @@ DataType Parser::E() {
 
             if (sym->category == CAT_FUNCTION) {
                 error("Имя функции '" + id_token.text + "' не может быть использовано в выражении.");
+            }
+
+            // Проверка на инициализацию
+            if (sym->category == CAT_VARIABLE || sym->category == CAT_PARAMETER) {
+                if (!sym->var_info.is_initialized) {
+                    std::cout << "Warning: На строке " << id_token.line
+                              << ": переменная '" << id_token.text 
+                              << "' используется неинициализированной." << std::endl;
+                }
             }
 
             advance();
